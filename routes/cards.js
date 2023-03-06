@@ -4,6 +4,7 @@ const {
   getAllCards, createCard, deleteCard, addLike, removeLike,
 } = require('../controllers/cards');
 
+/** Роутеры для /users */
 router.get('/', getAllCards);
 router.post('/', createCard);
 router.delete('/:cardId', deleteCard);

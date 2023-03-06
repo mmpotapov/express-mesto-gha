@@ -4,6 +4,7 @@ const {
   getAllUsers, getUser, createUser, updateUserInfo, updateUserAvatar,
 } = require('../controllers/users');
 
+/** Роутеры для /cards */
 router.get('/', getAllUsers);
 router.get('/:userId', getUser);
 router.post('/', createUser);

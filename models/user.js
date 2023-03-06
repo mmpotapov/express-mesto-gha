@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+/** Схема для данных о пользователе */
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -19,4 +20,5 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+/** Создание и экспорт модели */
 module.exports = mongoose.model('user', userSchema);
