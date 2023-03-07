@@ -20,8 +20,11 @@ app.use((req, res, next) => {
   };
   next();
 });
-/** Обработка запросов на /user и /cards */
+/** Обработка запросов на /user, /cards и остальные адреса */
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
+app.use('*', (req, res) => {
+  res.status(404).send({ message: 'Страница не найдена' });
+});
 
 app.listen(PORT);
