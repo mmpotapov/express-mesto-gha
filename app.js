@@ -2,12 +2,11 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
+const router = require('./routes/index');
+
 const { PORT = 3000 } = process.env;
 
 const app = express();
-
-const usersRouter = require('./routes/users');
-const cardsRouter = require('./routes/cards');
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
@@ -20,11 +19,6 @@ app.use((req, res, next) => {
   };
   next();
 });
-/** Обработка запросов на /user, /cards и остальные адреса */
-app.use('/users', usersRouter);
-app.use('/cards', cardsRouter);
-app.use('*', (req, res) => {
-  res.status(404).send({ message: 'Страница не найдена' });
-});
+app.use(router);
 
 app.listen(PORT);

@@ -1,23 +1,28 @@
 const Card = require('../models/card');
 
+const {
+  CREATED, BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR,
+} = require('../utils/httpStatus');
+
 /** /cards GET — получить список всех карточек */
 module.exports.getAllCards = (req, res) => {
   Card.find({})
+    .populate(['owner', 'likes'])
     .then((cards) => res.send(cards))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка на сервере' }));
+    .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' }));
 };
 
 /** /cards POST — загрузить на сервер новую карточку */
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.send(card))
+    .then((card) => res.status(CREATED).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Некорректный формат данных новой карточки' });
+        res.status(BAD_REQUEST).send({ message: 'Некорректный формат данных новой карточки' });
         return;
       }
-      res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
     });
 };
 
@@ -26,16 +31,16 @@ module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Карточка не найдена' });
+        res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
         return;
       } res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Ошибка при передаче данных о карточке' });
+        res.status(BAD_REQUEST).send({ message: 'Ошибка при передаче данных о карточке' });
         return;
       }
-      res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
     });
 };
 
@@ -48,17 +53,17 @@ module.exports.addLike = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Карточка не найдена' });
+        res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
         return;
       }
       res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
-        res.status(400).send({ message: 'Ошибка при передаче данных о карточке' });
+      if (err.name === 'CastError') {
+        res.status(BAD_REQUEST).send({ message: 'Ошибка при передаче данных о карточке' });
         return;
       }
-      res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
     });
 };
 
@@ -71,14 +76,14 @@ module.exports.removeLike = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Карточка не найдена' });
+        res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
         return;
       } res.send(card);
     }).catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
-        res.status(400).send({ message: 'Ошибка при передаче данных о карточке' });
+      if (err.name === 'CastError') {
+        res.status(BAD_REQUEST).send({ message: 'Ошибка при передаче данных о карточке' });
         return;
       }
-      res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
     });
 };
