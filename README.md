@@ -4,7 +4,9 @@
 ## [Яндекс Практикум](https://practicum.yandex.ru/web/) — Спринт 13
 ------
 
-Реализация на Node.js с подключением к базе MongoDB
+Реализация на Node.js с подключением к базе MongoDB.\
+Ссылка на репозиторий проекта: [mmpotapov/express-mesto-gha](https://github.com/mmpotapov/express-mesto-gha)
+
 
 **Установка и запуск**:\
 `npm i` - установка зависимостей\

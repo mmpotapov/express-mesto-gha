@@ -50,7 +50,7 @@ module.exports.updateUserInfo = (req, res) => {
   })
     .then((updatedUser) => {
       if (!updatedUser) {
-        res.status(404).send('Текущий пользователь не найден');
+        res.status(404).send({ message: 'Текущий пользователь не найден' });
         return;
       }
       res.send(updatedUser);
@@ -74,7 +74,7 @@ module.exports.updateUserAvatar = (req, res) => {
   })
     .then((updatedUser) => {
       if (!updatedUser) {
-        res.status(404).send('Текущий пользователь не найден');
+        res.status(404)({ message: 'Текущий пользователь не найден' });
         return;
       }
       res.send(updatedUser);

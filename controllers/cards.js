@@ -26,7 +26,7 @@ module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(404).send('Карточка не найдена');
+        res.status(404).send({ message: 'Карточка не найдена' });
         return;
       } res.send(card);
     })
@@ -48,7 +48,7 @@ module.exports.addLike = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(404).send('Карточка не найдена');
+        res.status(404).send({ message: 'Карточка не найдена' });
         return;
       }
       res.send(card);
@@ -71,7 +71,7 @@ module.exports.removeLike = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(404).send('Карточка не найдена');
+        res.status(404).send({ message: 'Карточка не найдена' });
         return;
       } res.send(card);
     }).catch((err) => {
