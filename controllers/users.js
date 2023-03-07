@@ -60,7 +60,7 @@ module.exports.updateUserInfo = (req, res) => {
       res.send(updatedUser);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Ошибка при передаче новых данных о пользователе' });
         return;
       }
@@ -84,7 +84,7 @@ module.exports.updateUserAvatar = (req, res) => {
       res.send(updatedUser);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Ошибка при передаче нового аватара для пользователя' });
         return;
       }
