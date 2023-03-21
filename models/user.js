@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+// const validator = require('validator');
 
 /** Схема для данных о пользователе */
 const userSchema = new mongoose.Schema({
