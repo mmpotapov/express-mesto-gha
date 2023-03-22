@@ -14,7 +14,7 @@ app.use(express.json());
 /** Хардкод id пользователя */
 app.use((req, res, next) => {
   req.user = {
-    _id: '6419fc720bef7c9207ead280',
+    _id: '641a0468d5f6ead4393efcdd',
   };
   next();
 });

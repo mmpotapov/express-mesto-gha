@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const jsonwebtoken = require('jsonwebtoken')
 
 const {
   CREATED, BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR,
@@ -30,17 +31,24 @@ module.exports.getUser = (req, res) => {
     });
 };
 
-/** /users POST — добавить нового пользователя */
+/** /signup POST — добавить нового пользователя */
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
-    .then((user) => res.status(CREATED).send(user))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({ message: 'Некорректный формат данных нового пользователя' });
-        return;
-      }
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => {
+      User.create({
+        name, about, avatar, email, password: hash,
+      })
+        .then((user) => res.status(CREATED).send(user))
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            res.status(BAD_REQUEST).send({ message: 'Некорректный формат данных нового пользователя' });
+            return;
+          }
+          res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+        });
     });
 };
 
@@ -86,6 +94,23 @@ module.exports.updateUserAvatar = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: 'Ошибка при передаче нового аватара для пользователя' });
+        return;
+      }
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+    });
+};
+
+/** /signin POST — авторизация */
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const jwt = jsonwebtoken.sign({ _id: user._id }, 'SOMERRRRRRRREEEEKEY', { expiresIn: '7d' });
+      res.send({ token: jwt });
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(BAD_REQUEST).send({ message: 'Некорректный формат введённых данных' });
         return;
       }
       res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });

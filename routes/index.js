@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const { createUser, login } = require('../controllers/users');
 
 const {
   NOT_FOUND,
@@ -8,6 +9,8 @@ const usersRouter = require('./users');
 const cardsRouter = require('./cards');
 
 /** Обработка запросов на /user, /cards и остальные адреса */
+router.post('/signup', createUser);
+router.post('/signin', login);
 router.use('/users', usersRouter);
 router.use('/cards', cardsRouter);
 router.use('*', (req, res) => {
