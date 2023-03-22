@@ -1,5 +1,6 @@
+const bcrypt = require('bcryptjs');
+const jsonwebtoken = require('jsonwebtoken');
 const User = require('../models/user');
-const jsonwebtoken = require('jsonwebtoken')
 
 const {
   CREATED, BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR,
