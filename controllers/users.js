@@ -116,3 +116,18 @@ module.exports.login = (req, res) => {
       res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
     });
 };
+
+/** /users/me GET — получить инфо о текущем пользователе */
+module.exports.getCurrentUser = (req, res) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
+        return;
+      }
+      res.send(user);
+    })
+    .catch(() => {
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+    });
+};
