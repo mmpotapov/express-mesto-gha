@@ -38,10 +38,9 @@ module.exports.deleteCard = (req, res) => {
         res.status(FORBIDDEN).send({ message: 'Нет прав для удаления карточки' });
         return;
       }
-      card.deleteOne();
-    })
-    .then(() => {
-      res.status(OK).send({ message: 'Успешно удалено' });
+      card.deleteOne().then(() => {
+        res.status(OK).send({ message: 'Успешно удалено' });
+      });
     })
     .catch((err) => {
       if (err.name === 'CastError') {

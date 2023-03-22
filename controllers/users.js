@@ -5,6 +5,9 @@ const User = require('../models/user');
 const {
   CREATED, BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR,
 } = require('../utils/httpStatus');
+const {
+  SECRET_KEY,
+} = require('../utils/constants');
 
 /** /users GET — получить список всех пользователей */
 module.exports.getAllUsers = (req, res) => {
@@ -106,7 +109,7 @@ module.exports.login = (req, res) => {
   const { email, password } = req.body;
   User.findUserByCredentials(email, password)
     .then((user) => {
-      const jwt = jsonwebtoken.sign({ _id: user._id }, 'SOMERRRRRRRREEEEKEY', { expiresIn: '7d' });
+      const jwt = jsonwebtoken.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' });
       res.send({ token: jwt });
     })
     .catch((err) => {

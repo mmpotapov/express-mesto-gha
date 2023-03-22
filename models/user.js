@@ -22,14 +22,14 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
+    required: true,
+    unique: true,
     validate: {
       validator(v) {
         return validator.isEmail(v);
       },
-      message: 'Некорректный адрес электронной почты',
+      message: 'Неверный формат электронной почты',
     },
-    required: true,
-    unique: true,
   },
   password: {
     type: String,
@@ -38,6 +38,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+/** Метод для авторизации */
 userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
