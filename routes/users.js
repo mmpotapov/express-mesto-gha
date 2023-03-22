@@ -6,8 +6,8 @@ const {
 
 /** Роутеры для /users */
 router.get('/', getAllUsers);
-router.get('/:userId', getUser);
 router.get('/me', getCurrentUser);
+router.get('/:userId', getUser);
 router.patch('/me', updateUserInfo);
 router.patch('/me/avatar', updateUserAvatar);
 

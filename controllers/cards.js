@@ -1,7 +1,7 @@
 const Card = require('../models/card');
 
 const {
-  CREATED, BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR,
+  OK, CREATED, BAD_REQUEST, FORBIDDEN, NOT_FOUND, INTERNAL_SERVER_ERROR,
 } = require('../utils/httpStatus');
 
 /** /cards GET — получить список всех карточек */
@@ -26,14 +26,22 @@ module.exports.createCard = (req, res) => {
     });
 };
 
-/** /cards/:cardId DELETE — удалить с сервера указанную карточку */
+/** /cards/:cardId DELETE — удалить с сервера указанную карточку пользователя */
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
         res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
         return;
-      } res.send(card);
+      }
+      if (req.user._id !== card.owner.toString()) {
+        res.status(FORBIDDEN).send({ message: 'Нет прав для удаления карточки' });
+        return;
+      }
+      card.deleteOne();
+    })
+    .then(() => {
+      res.status(OK).send({ message: 'Успешно удалено' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
