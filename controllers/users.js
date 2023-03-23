@@ -11,6 +11,7 @@ const {
 
 const BadRequestError = require('../errors/badRequestError');
 const NotFoundError = require('../errors/notFoundError');
+const ConflictError = require('../errors/conflictError');
 
 /** /users GET — получить список всех пользователей */
 module.exports.getAllUsers = (req, res, next) => {
@@ -50,6 +51,9 @@ module.exports.createUser = (req, res, next) => {
         .catch((err) => {
           if (err.name === 'ValidationError') {
             return next(new BadRequestError('Некорректный формат данных нового пользователя'));
+          }
+          if (err.code === 11000) {
+            return next(new ConflictError('Пользователь уже зарегистрирован на сайте'));
           }
           return next(err);
         });
@@ -125,7 +129,5 @@ module.exports.getCurrentUser = (req, res, next) => {
       }
       res.send(user);
     })
-    .catch((error) => {
-      next(error);
-    });
+    .catch(next);
 };
