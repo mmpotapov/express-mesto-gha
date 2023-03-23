@@ -1,7 +1,5 @@
 const jsonwebtoken = require('jsonwebtoken');
-const {
-  UNAUTHORIZED,
-} = require('../utils/httpStatus');
+const UnauthorizedError = require('../errors/unauthorizedError');
 const {
   SECRET_KEY,
 } = require('../utils/constants');
@@ -9,7 +7,7 @@ const {
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    return res.status(UNAUTHORIZED).send({ message: 'Необходима авторизация' });
+    return next(new UnauthorizedError('Необходима авторизация'));
   }
   const token = authorization.replace('Bearer ', '');
 
@@ -17,7 +15,7 @@ module.exports = (req, res, next) => {
   try {
     payload = jsonwebtoken.verify(token, SECRET_KEY);
   } catch (err) {
-    return res.status(UNAUTHORIZED).send({ message: 'Необходима авторизация' });
+    return next(new UnauthorizedError('Необходима авторизация'));
   }
 
   req.user = payload;

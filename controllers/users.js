@@ -59,7 +59,8 @@ module.exports.createUser = (req, res, next) => {
           }
           return next(err);
         });
-    });
+    })
+    .catch(next);
 };
 
 /** /users/me PATCH — обновить информацию о пользователе  */
