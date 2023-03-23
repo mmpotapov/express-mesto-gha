@@ -47,7 +47,9 @@ module.exports.createUser = (req, res, next) => {
       User.create({
         name, about, avatar, email, password: hash,
       })
-        .then((user) => res.status(CREATED).send(user))
+        .then(() => res.status(CREATED).send({
+          name, about, avatar, email,
+        }))
         .catch((err) => {
           if (err.name === 'ValidationError') {
             return next(new BadRequestError('Некорректный формат данных нового пользователя'));
