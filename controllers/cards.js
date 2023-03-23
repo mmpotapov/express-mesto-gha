@@ -1,42 +1,43 @@
 const Card = require('../models/card');
 
 const {
-  OK, CREATED, BAD_REQUEST, FORBIDDEN, NOT_FOUND, INTERNAL_SERVER_ERROR,
+  OK, CREATED,
 } = require('../utils/httpStatus');
 
+const BadRequestError = require('../errors/badRequestError');
+const NotFoundError = require('../errors/notFoundError');
+const ForbiddenError = require('../errors/forbiddenError');
+
 /** /cards GET — получить список всех карточек */
-module.exports.getAllCards = (req, res) => {
+module.exports.getAllCards = (req, res, next) => {
   Card.find({})
     .populate(['owner', 'likes'])
     .then((cards) => res.send(cards))
-    .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' }));
+    .catch(next);
 };
 
 /** /cards POST — загрузить на сервер новую карточку */
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(CREATED).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({ message: 'Некорректный формат данных новой карточки' });
-        return;
+        return next(new BadRequestError('Некорректный формат данных новой карточки'));
       }
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+      return next(err);
     });
 };
 
 /** /cards/:cardId DELETE — удалить с сервера указанную карточку пользователя */
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
-        return;
+        throw new NotFoundError('Карточка не найдена');
       }
       if (req.user._id !== card.owner.toString()) {
-        res.status(FORBIDDEN).send({ message: 'Нет прав для удаления карточки' });
-        return;
+        throw new ForbiddenError('Нет прав для удаления карточки');
       }
       card.deleteOne().then(() => {
         res.status(OK).send({ message: 'Успешно удалено' });
@@ -44,15 +45,14 @@ module.exports.deleteCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: 'Ошибка при передаче данных о карточке' });
-        return;
+        return next(new BadRequestError('Ошибка при передаче данных о карточке'));
       }
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+      return next(err);
     });
 };
 
 /** /cards/:cardId/likes PUT — проставить лайк */
-module.exports.addLike = (req, res) => {
+module.exports.addLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -60,22 +60,21 @@ module.exports.addLike = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
-        return;
+        throw new NotFoundError('Карточка не найдена');
       }
       res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: 'Ошибка при передаче данных о карточке' });
-        return;
+        return next(new BadRequestError('Ошибка при передаче данных о карточке'));
       }
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+      // res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+      return next(err);
     });
 };
 
 /** /cards/:cardId/likes DELETE — убрать лайк */
-module.exports.removeLike = (req, res) => {
+module.exports.removeLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -83,14 +82,12 @@ module.exports.removeLike = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
-        return;
+        throw new NotFoundError('Карточка не найдена');
       } res.send(card);
     }).catch((err) => {
       if (err.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: 'Ошибка при передаче данных о карточке' });
-        return;
+        return next(new BadRequestError('Ошибка при передаче данных о карточке'));
       }
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+      return next(err);
     });
 };

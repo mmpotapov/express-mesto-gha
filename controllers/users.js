@@ -3,40 +3,41 @@ const jsonwebtoken = require('jsonwebtoken');
 const User = require('../models/user');
 
 const {
-  CREATED, BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR,
+  CREATED,
 } = require('../utils/httpStatus');
 const {
   SECRET_KEY,
 } = require('../utils/constants');
 
+const BadRequestError = require('../errors/badRequestError');
+const NotFoundError = require('../errors/notFoundError');
+
 /** /users GET — получить список всех пользователей */
-module.exports.getAllUsers = (req, res) => {
+module.exports.getAllUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' }));
+    .catch(next);
 };
 
 /** /users/:userId GET — получить инфо о пользователе по id */
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
-        return;
+        throw new NotFoundError('Пользователь не найден');
       }
       res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: 'Некорректный ID пользователя' });
-        return;
+        return next(new BadRequestError('Некорректный ID пользователя'));
       }
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+      return next(err);
     });
 };
 
 /** /signup POST — добавить нового пользователя */
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -48,16 +49,15 @@ module.exports.createUser = (req, res) => {
         .then((user) => res.status(CREATED).send(user))
         .catch((err) => {
           if (err.name === 'ValidationError') {
-            res.status(BAD_REQUEST).send({ message: 'Некорректный формат данных нового пользователя' });
-            return;
+            return next(new BadRequestError('Некорректный формат данных нового пользователя'));
           }
-          res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+          return next(err);
         });
     });
 };
 
 /** /users/me PATCH — обновить информацию о пользователе  */
-module.exports.updateUserInfo = (req, res) => {
+module.exports.updateUserInfo = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, {
     new: true,
@@ -66,22 +66,20 @@ module.exports.updateUserInfo = (req, res) => {
   })
     .then((updatedUser) => {
       if (!updatedUser) {
-        res.status(NOT_FOUND).send({ message: 'Текущий пользователь не найден' });
-        return;
+        throw new NotFoundError('Текущий пользователь не найден');
       }
       res.send(updatedUser);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({ message: 'Ошибка при передаче новых данных о пользователе' });
-        return;
+        return next(new BadRequestError('Ошибка при передаче новых данных о пользователе'));
       }
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+      return next(err);
     });
 };
 
 /** /users/me/avatar PATCH — обновить аватар пользователя  */
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, {
     new: true,
@@ -90,22 +88,20 @@ module.exports.updateUserAvatar = (req, res) => {
   })
     .then((updatedUser) => {
       if (!updatedUser) {
-        res.status(NOT_FOUND)({ message: 'Текущий пользователь не найден' });
-        return;
+        throw new NotFoundError('Текущий пользователь не найден');
       }
       res.send(updatedUser);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({ message: 'Ошибка при передаче нового аватара для пользователя' });
-        return;
+        return next(new BadRequestError('Ошибка при передаче нового аватара для пользователя'));
       }
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+      return next(err);
     });
 };
 
 /** /signin POST — авторизация */
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   User.findUserByCredentials(email, password)
     .then((user) => {
@@ -114,24 +110,22 @@ module.exports.login = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(BAD_REQUEST).send({ message: 'Некорректный формат введённых данных' });
-        return;
+        return next(new BadRequestError('Некорректный формат введённых данных'));
       }
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+      return next(err);
     });
 };
 
 /** /users/me GET — получить инфо о текущем пользователе */
-module.exports.getCurrentUser = (req, res) => {
+module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        res.status(NOT_FOUND).send({ message: 'Пользователь не найден' });
-        return;
+        throw new NotFoundError('Пользователь не найден');
       }
       res.send(user);
     })
-    .catch(() => {
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка на сервере' });
+    .catch((error) => {
+      next(error);
     });
 };

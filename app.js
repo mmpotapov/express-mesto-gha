@@ -14,6 +14,6 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 /** Обработка запросов */
 app.use(express.json());
 app.use(router);
-// app.use(errorHandler);
+app.use(errorHandler);
 
 app.listen(PORT);
